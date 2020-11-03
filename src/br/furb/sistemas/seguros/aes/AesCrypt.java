@@ -21,7 +21,7 @@ public class AesCrypt {
 	public void crypt(File fileToCrypt, String destFile, String key) throws Exception {
 		try (PrintWriter outputWriter = new PrintWriter(new FileWriter(destFile))) {
 			AesCrypt.outputWriter = outputWriter;
-			String logFile = new File(destFile).getParent() + File.separator + "log_criptografia.txt";
+			String logFile = new File(destFile).getParent() + File.separator + "log_operations.txt";
 			try (PrintWriter logWriter = new PrintWriter(new FileWriter(logFile))) {
 				AesCrypt.logWriter = logWriter;
 	
@@ -83,7 +83,7 @@ public class AesCrypt {
 	 */
 	public static void doLog(String log) {
 		try {
-			AesCrypt.logWriter.write(new String(log.getBytes("UTF-8")));
+			logWriter.write(new String(log.getBytes("UTF-8")));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -100,7 +100,7 @@ public class AesCrypt {
 				for (int column = 0; column < matrix.length; column++) {
 					try {
 						String output = matrix[line][column];
-						AesCrypt.outputWriter.write(new String(output.getBytes("UTF-8")));
+						outputWriter.write(new String(output.getBytes("UTF-8")));
 					} catch (UnsupportedEncodingException e) {
 						e.printStackTrace();
 					}
