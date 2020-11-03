@@ -61,7 +61,7 @@ public class CryptUtils {
 					line = 0;
 					column++;
 				}
-				// se as colunas terminara, iniciar uma nova matriz
+				// se as colunas terminaram, iniciar uma nova matriz
 				if (column > 3) {
 					matrix = new String[MATRIX_LENGTH][MATRIX_LENGTH];
 					matrices.add(matrix);
