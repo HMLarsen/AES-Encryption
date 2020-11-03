@@ -93,6 +93,10 @@ public class CryptUtils {
 		return String.format("0x%02x", parseHexToInt(hex));
 	}
 
+	/**
+	 * @param hex texto representativo do hexadecimal
+	 * @return o valor inteiro equivalente ao hexadecimal representado
+	 */
 	public static int parseHexToInt(String hex) {
 		return Integer.parseInt(hex, 16);
 	}

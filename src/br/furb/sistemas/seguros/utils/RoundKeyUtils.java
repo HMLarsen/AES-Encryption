@@ -122,21 +122,25 @@ public class RoundKeyUtils {
 		int[][] multiMatrix = AesConstants.multiMatrix;
 		for (int line = 0; line < resultMatrix.length; line++) {
 			for (int column = 0; column < resultMatrix.length; column++) {
+				// valores da matriz ShiftRows
 				int matrixValue1 = CryptUtils.parseHexToInt(matrix[0][line]);
 				int matrixValue2 = CryptUtils.parseHexToInt(matrix[1][line]);
 				int matrixValue3 = CryptUtils.parseHexToInt(matrix[2][line]);
 				int matrixValue4 = CryptUtils.parseHexToInt(matrix[3][line]);
 
+				// valores da matriz de multiplicação
 				int multiValue1 = multiMatrix[column][0];
 				int multiValue2 = multiMatrix[column][1];
 				int multiValue3 = multiMatrix[column][2];
 				int multiValue4 = multiMatrix[column][3];
 
+				// valores da operação de Galois
 				int galoisValue1 = getGaloisOperation(matrixValue1, multiValue1);
 				int galoisValue2 = getGaloisOperation(matrixValue2, multiValue2);
 				int galoisValue3 = getGaloisOperation(matrixValue3, multiValue3);
 				int galoisValue4 = getGaloisOperation(matrixValue4, multiValue4);
 
+				// XOR com os valores resultantes
 				int operation = galoisValue1 ^ galoisValue2 ^ galoisValue3 ^ galoisValue4;
 				resultMatrix[column][line] = Integer.toHexString(operation);
 			}
@@ -144,6 +148,19 @@ public class RoundKeyUtils {
 		return resultMatrix;
 	}
 
+	/**
+	 * Realiza a multiplicação de Galois.<br>
+	 * Pega os valores correspondes dos termos na tabela {@link AesConstants#lTable} e soma esses valores.<br>
+	 * Se a soma for maior que <code>0xff</code> então é subtraído <code>0xff</code> da soma.<br>
+	 * O valor da soma é pego da correspondência na {@link AesConstants#eTable}.
+	 * Exceções:<br>
+	 * Se o primeiro termo for 0 então o resultado é 0.<br>
+	 * Se o primeiro ou segundo termo forem 1 então o resultado é outro termo.<br>
+	 * 
+	 * @param hex1 termo 1
+	 * @param hex2 termo 2
+	 * @return
+	 */
 	private static int getGaloisOperation(int hex1, int hex2) {
 		if (hex1 == 0) {
 			return 0;
@@ -154,18 +171,21 @@ public class RoundKeyUtils {
 		if (hex2 == 1) {
 			return hex1;
 		}
-		int value1 = AesConstants.tabelaL[hex1 / 16][hex1 % 16];
-		int value2 = AesConstants.tabelaL[hex2 / 16][hex2 % 16];
+		int value1 = AesConstants.lTable[hex1 / 16][hex1 % 16];
+		int value2 = AesConstants.lTable[hex2 / 16][hex2 % 16];
 		int sum = value1 + value2;
 		if (sum > 0xff) {
 			sum -= 0xff;
 		}
-		return getSubTableE(sum);
+		return getTableEValue(sum);
 	}
 
-	private static int getSubTableE(int hex) {
-		int value = AesConstants.tabelaE[hex / 16][hex % 16];
-		return value;
+	/**
+	 * @param hex valor inteiro do hexadecimal
+	 * @return valor correspondente do hexadecimal na {@link AesConstants#eTable}
+	 */
+	private static int getTableEValue(int hex) {
+		return AesConstants.eTable[hex / 16][hex % 16];
 	}
 
 }

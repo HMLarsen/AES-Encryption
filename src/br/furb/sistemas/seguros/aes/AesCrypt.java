@@ -18,6 +18,14 @@ public class AesCrypt {
 	private static PrintWriter logWriter;
 	private static PrintWriter outputWriter;
 
+	/**
+	 * Realiza a operação de criptografia AES.
+	 * 
+	 * @param fileToCrypt arquivo a ser cifrado
+	 * @param destFile arquivo criptografado a ser gerado
+	 * @param key chave da criptografia
+	 * @throws Exception
+	 */
 	public void crypt(File fileToCrypt, String destFile, String key) throws Exception {
 		try (PrintWriter outputWriter = new PrintWriter(new FileWriter(destFile))) {
 			AesCrypt.outputWriter = outputWriter;
