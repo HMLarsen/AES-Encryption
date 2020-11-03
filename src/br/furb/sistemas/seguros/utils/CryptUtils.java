@@ -54,11 +54,14 @@ public class CryptUtils {
 			String[][] matrix = new String[MATRIX_LENGTH][MATRIX_LENGTH];
 			matrices.add(matrix);
 
+			// percorrer os bytes do arquivo e preencher as colunas das matrizes
 			for (int i = 0; i < fileBytesSize; i++) {
+				// se as linhas terminaram, iniciar a nova coluna
 				if (line > 3) {
 					line = 0;
 					column++;
 				}
+				// se as colunas terminara, iniciar uma nova matriz
 				if (column > 3) {
 					matrix = new String[MATRIX_LENGTH][MATRIX_LENGTH];
 					matrices.add(matrix);
