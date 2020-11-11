@@ -22,8 +22,8 @@ public class WordUtils {
 	public static String[] doXor(String[] word1, String[] word2) {
 		String[] xor = new String[AesConstants.MATRIX_LENGTH];
 		for (int i = 0; i < xor.length; i++) {
-			int hex1 = CryptUtils.parseHexToInt(word1[i]);
-			int hex2 = CryptUtils.parseHexToInt(word2[i]);
+			int hex1 = CryptUtils.hexToInt(word1[i]);
+			int hex2 = CryptUtils.hexToInt(word2[i]);
 			xor[i] = Integer.toHexString(hex1 ^ hex2);
 		}
 		return xor;
@@ -38,7 +38,7 @@ public class WordUtils {
 	public static String[] doSub(String[] word) {
 		List<String> subWord = new ArrayList<>();
 		for (int i = 0; i < word.length; i++) {
-			int hex = CryptUtils.parseHexToInt(String.valueOf(word[i]));
+			int hex = CryptUtils.hexToInt(String.valueOf(word[i]));
 			int value = AesConstants.sbox[hex / 16][hex % 16];
 			subWord.add(Integer.toHexString(value));
 		}

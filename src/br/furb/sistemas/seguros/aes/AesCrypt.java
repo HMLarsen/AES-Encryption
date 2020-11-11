@@ -3,7 +3,6 @@ package br.furb.sistemas.seguros.aes;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,72 +15,74 @@ import br.furb.sistemas.seguros.utils.RoundKeyUtils;
 public class AesCrypt {
 
 	private static PrintWriter logWriter;
-	private static PrintWriter outputWriter;
 
 	/**
 	 * Realiza a operação de criptografia AES.
 	 * 
 	 * @param fileToCrypt arquivo a ser cifrado
-	 * @param destFile arquivo criptografado a ser gerado
-	 * @param key chave da criptografia
+	 * @param destFile    arquivo criptografado a ser gerado
+	 * @param key         chave da criptografia
 	 * @throws Exception
 	 */
 	public void crypt(File fileToCrypt, String destFile, String key) throws Exception {
-		try (PrintWriter outputWriter = new PrintWriter(new FileWriter(destFile))) {
-			AesCrypt.outputWriter = outputWriter;
-			String logFile = new File(destFile).getParent() + File.separator + "log_operations.txt";
-			try (PrintWriter logWriter = new PrintWriter(new FileWriter(logFile))) {
-				AesCrypt.logWriter = logWriter;
-	
-				// pegar a matriz da chave
-				String[][] keyMatrix = CryptUtils.getKeyMatrix(key);
-				doLog("**** Chave ****");
-				doRoundKeyLog(keyMatrix);
-	
-				// gerar as chaves
-				KeySchedule keySchedule = new KeySchedule(keyMatrix);
-				List<String[][]> roundKeys = keySchedule.getRoundKeys();
-	
-				// criptografar os blocos gerados do arquivo de entrada
-				List<String[][]> cryptedMatrices = new ArrayList<>();
-				List<String[][]> fileMatrices = CryptUtils.getMatricesFileToCrypt(fileToCrypt);
-				fileMatrices.forEach(fileMatrix -> {
-					doLog("**** Texto simples ****");
-					doRoundKeyLog(fileMatrix);
-	
-					String[][] cryptedMatrix = RoundKeyUtils.doXor(fileMatrix, keyMatrix);
-					doLog("**** AddRoundKey-Round 0 ****");
+		List<String[][]> cryptedMatrices = new ArrayList<>();
+		String logFile = new File(destFile).getParent() + File.separator + "log_operations.txt";
+
+		try (PrintWriter logWriter = new PrintWriter(new FileWriter(logFile))) {
+			AesCrypt.logWriter = logWriter;
+
+			// pegar a matriz da chave
+			String[][] keyMatrix = CryptUtils.getKeyMatrix(key);
+			doLog("**** Chave ****");
+			doRoundKeyLog(keyMatrix);
+
+			// gerar as chaves
+			KeySchedule keySchedule = new KeySchedule(keyMatrix);
+			List<String[][]> roundKeys = keySchedule.getRoundKeys();
+
+			// criptografar os blocos gerados do arquivo de entrada
+			List<String[][]> fileMatrices = CryptUtils.getMatricesFileToCrypt(fileToCrypt);
+			fileMatrices.forEach(fileMatrix -> {
+				doLog("**** Texto simples ****");
+				doRoundKeyLog(fileMatrix);
+
+				String[][] cryptedMatrix = RoundKeyUtils.doXor(fileMatrix, keyMatrix);
+				doLog("**** AddRoundKey-Round 0 ****");
+				doRoundKeyLog(cryptedMatrix);
+
+				// 10 repetições utilizando as Round Key geradas
+				for (int i = 1; i < 11; i++) {
+					cryptedMatrix = RoundKeyUtils.doSubBytes(cryptedMatrix);
+					doLog("**** SubBytes-Round " + i + " ****");
 					doRoundKeyLog(cryptedMatrix);
-	
-					// 10 repetições utilizando as Round Key geradas
-					for (int i = 1; i < 11; i++) {
-						cryptedMatrix = RoundKeyUtils.doSubBytes(cryptedMatrix);
-						doLog("**** SubBytes-Round " + i + " ****");
-						doRoundKeyLog(cryptedMatrix);
-	
-						cryptedMatrix = RoundKeyUtils.doShiftRows(cryptedMatrix);
-						doLog("**** ShiftRows-Round " + i + " ****");
-						doRoundKeyLog(cryptedMatrix);
-	
-						// na última operação não deve ser feito a mixagem das colunas
-						if (i < 10) {
-							cryptedMatrix = RoundKeyUtils.doMixColumns(cryptedMatrix);
-							doLog("**** MixedColumns-Round " + i + " ****");
-							doRoundKeyLog(cryptedMatrix);
-						}
-	
-						cryptedMatrix = RoundKeyUtils.doXor(cryptedMatrix, roundKeys.get(i));
-						doLog("**** addRoundKey-Round " + i + " ****");
+
+					cryptedMatrix = RoundKeyUtils.doShiftRows(cryptedMatrix);
+					doLog("**** ShiftRows-Round " + i + " ****");
+					doRoundKeyLog(cryptedMatrix);
+
+					// na última operação não deve ser feito a mixagem das colunas
+					if (i < 10) {
+						cryptedMatrix = RoundKeyUtils.doMixColumns(cryptedMatrix);
+						doLog("**** MixedColumns-Round " + i + " ****");
 						doRoundKeyLog(cryptedMatrix);
 					}
-	
-					doLog("**** Texto cifrado ****");
+
+					cryptedMatrix = RoundKeyUtils.doXor(cryptedMatrix, roundKeys.get(i));
+					doLog("**** addRoundKey-Round " + i + " ****");
 					doRoundKeyLog(cryptedMatrix);
-					cryptedMatrices.add(cryptedMatrix);
-				});
-				doOutput(cryptedMatrices);
-			}
+				}
+
+				doLog("**** Texto cifrado ****");
+				doRoundKeyLog(cryptedMatrix);
+				cryptedMatrices.add(cryptedMatrix);
+			});
 		}
+
+		// geração do output
+		if (cryptedMatrices.isEmpty()) {
+			throw new Exception("Os blocos cifrados estão vazios.");
+		}
+		doOutput(destFile, cryptedMatrices);
 	}
 
 	/**
@@ -91,30 +92,11 @@ public class AesCrypt {
 	 */
 	public static void doLog(String log) {
 		try {
-			logWriter.write(new String(log.getBytes("UTF-8")));
-		} catch (UnsupportedEncodingException e) {
+			byte[] bytes = log.getBytes("UTF-8");
+			logWriter.write(new String(bytes));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Escreve no arquivo a criptografia calculada.
-	 * 
-	 * @param cryptedMatrices matrizes com blocos criptografados
-	 */
-	public static void doOutput(List<String[][]> cryptedMatrices) {
-		cryptedMatrices.forEach(matrix -> {
-			for (int line = 0; line < matrix.length; line++) {
-				for (int column = 0; column < matrix.length; column++) {
-					try {
-						String output = matrix[line][column];
-						outputWriter.write(new String(output.getBytes("UTF-8")));
-					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
 	}
 
 	/**
@@ -132,6 +114,27 @@ public class AesCrypt {
 		}
 		sb.append("\n");
 		doLog(sb.toString());
+	}
+
+	/**
+	 * Escreve no arquivo de saída a criptografia calculada.
+	 * 
+	 * @param destFile        caminho do arquivo de saída
+	 * @param cryptedMatrices matrizes com blocos criptografados
+	 * @throws Exception
+	 */
+	public static void doOutput(String destFile, List<String[][]> cryptedMatrices) throws Exception {
+		try (PrintWriter outputWriter = new PrintWriter(new FileWriter(destFile))) {
+			cryptedMatrices.forEach(matrix -> {
+				for (int line = 0; line < matrix.length; line++) {
+					for (int column = 0; column < matrix.length; column++) {
+						String hex = matrix[line][column];
+						byte[] bin = CryptUtils.hexToBin(hex);
+						outputWriter.write(new String(bin));
+					}
+				}
+			});
+		}
 	}
 
 }

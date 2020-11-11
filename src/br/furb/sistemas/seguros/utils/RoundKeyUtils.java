@@ -123,10 +123,10 @@ public class RoundKeyUtils {
 		for (int line = 0; line < resultMatrix.length; line++) {
 			for (int column = 0; column < resultMatrix.length; column++) {
 				// valores da matriz ShiftRows
-				int matrixValue1 = CryptUtils.parseHexToInt(matrix[0][line]);
-				int matrixValue2 = CryptUtils.parseHexToInt(matrix[1][line]);
-				int matrixValue3 = CryptUtils.parseHexToInt(matrix[2][line]);
-				int matrixValue4 = CryptUtils.parseHexToInt(matrix[3][line]);
+				int matrixValue1 = CryptUtils.hexToInt(matrix[0][line]);
+				int matrixValue2 = CryptUtils.hexToInt(matrix[1][line]);
+				int matrixValue3 = CryptUtils.hexToInt(matrix[2][line]);
+				int matrixValue4 = CryptUtils.hexToInt(matrix[3][line]);
 
 				// valores da matriz de multiplicação
 				int multiValue1 = multiMatrix[column][0];

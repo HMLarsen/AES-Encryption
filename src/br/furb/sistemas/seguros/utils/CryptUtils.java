@@ -93,15 +93,34 @@ public class CryptUtils {
 	 * @return hexadecimal formatado corretamente
 	 */
 	public static String formatHex(String hex) {
-		return String.format("0x%02x", parseHexToInt(hex));
+		return String.format("0x%02x", hexToInt(hex));
 	}
 
 	/**
 	 * @param hex texto representativo do hexadecimal
 	 * @return o valor inteiro equivalente ao hexadecimal representado
 	 */
-	public static int parseHexToInt(String hex) {
+	public static int hexToInt(String hex) {
 		return Integer.parseInt(hex, 16);
+	}
+
+	/**
+	 * Converte um hexadecimal, representado em String, para binário.
+	 * 
+	 * @param hex hexadecimal
+	 * @return representação binária para o valor hexadecimal
+	 */
+	public static byte[] hexToBin(String hex) {
+		int len = hex.length();
+		byte[] out = new byte[len / 2];
+		int endIndx;
+		for (int i = 0; i < len; i = i + 2) {
+			endIndx = i + 2;
+			if (endIndx > len)
+				endIndx = len - 1;
+			out[i / 2] = (byte) Integer.parseInt(hex.substring(i, endIndx), 16);
+		}
+		return out;
 	}
 
 }
