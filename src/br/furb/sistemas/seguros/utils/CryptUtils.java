@@ -111,16 +111,13 @@ public class CryptUtils {
 	 * @return representação binária para o valor hexadecimal
 	 */
 	public static byte[] hexToBin(String hex) {
-		int len = hex.length();
-		byte[] out = new byte[len / 2];
-		int endIndx;
-		for (int i = 0; i < len; i = i + 2) {
-			endIndx = i + 2;
-			if (endIndx > len)
-				endIndx = len - 1;
-			out[i / 2] = (byte) Integer.parseInt(hex.substring(i, endIndx), 16);
+		byte[] val = new byte[hex.length() / 2];
+		for (int i = 0; i < val.length; i++) {
+			int index = i * 2;
+			int j = Integer.parseInt(hex.substring(index, index + 2), 16);
+			val[i] = (byte) j;
 		}
-		return out;
+		return val;
 	}
 
 }
