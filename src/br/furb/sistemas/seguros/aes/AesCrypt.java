@@ -1,7 +1,10 @@
 package br.furb.sistemas.seguros.aes;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,13 +127,17 @@ public class AesCrypt {
 	 * @throws Exception
 	 */
 	public static void doOutput(String destFile, List<String[][]> cryptedMatrices) throws Exception {
-		try (PrintWriter outputWriter = new PrintWriter(new FileWriter(destFile))) {
+		try (OutputStream outputWriter = new FileOutputStream(destFile)) {
 			cryptedMatrices.forEach(matrix -> {
 				for (int line = 0; line < matrix.length; line++) {
 					for (int column = 0; column < matrix.length; column++) {
 						String hex = matrix[line][column];
-						byte[] bin = CryptUtils.hexToBin(hex);
-						outputWriter.write(new String(bin));
+						int intValue = CryptUtils.hexToInt(hex);
+						try {
+							outputWriter.write(intValue);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			});

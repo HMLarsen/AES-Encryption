@@ -69,7 +69,7 @@ public class CryptUtils {
 					column = 0;
 				}
 				byte b = fileBytes[i];
-				matrix[line++][column] = Integer.toHexString(b);
+				matrix[line++][column] = byteToHex(b);
 			}
 		}
 		Pkcs5.doPadding(matrices);
@@ -105,19 +105,11 @@ public class CryptUtils {
 	}
 
 	/**
-	 * Converte um hexadecimal, representado em String, para binário.
-	 * 
-	 * @param hex hexadecimal
-	 * @return representação binária para o valor hexadecimal
+	 * @param value byte a ser representado
+	 * @return representação hexadecimal para o byte correspondente
 	 */
-	public static byte[] hexToBin(String hex) {
-		byte[] val = new byte[hex.length() / 2];
-		for (int i = 0; i < val.length; i++) {
-			int index = i * 2;
-			int j = Integer.parseInt(hex.substring(index, index + 2), 16);
-			val[i] = (byte) j;
-		}
-		return val;
+	public static String byteToHex(byte value) {
+		return String.format("%02x", value);
 	}
 
 }
